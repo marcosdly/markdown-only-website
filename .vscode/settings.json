@@ -1,0 +1,15 @@
+{
+  "editor.rulers": [88],
+  "editor.wordWrapColumn": 88,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.wordWrap": "wordWrapColumn",
+  "explorer.openEditors.sortOrder": "alphabetical",
+  "explorer.sortOrder": "type",
+  "explorer.sortOrderLexicographicOptions": "upper",
+  "search.sortOrder": "type",
+  "search.quickOpen.history.filterSortOrder": "recency",
+  "scm.repositories.sortOrder": "name",
+  "scm.defaultViewSortKey": "status"
+}

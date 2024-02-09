@@ -30,7 +30,7 @@ export default vite.defineConfig((command, mode) => {
         format: { comments: false },
       },
       rollupOptions: {
-        input: ["./pages/home/index.html"],
+        input: ["./index.html"],
         preserveEntrySignatures: "allow-extension",
         output: {
           preserveModules: false,

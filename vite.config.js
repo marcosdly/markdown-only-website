@@ -1,6 +1,7 @@
 "use strict";
 
 import * as vite from "vite";
+import * as sass from "./lib/build/sass";
 
 export default vite.defineConfig((command, mode) => {
   /** @type {vite.UserConfig} */
@@ -10,6 +11,9 @@ export default vite.defineConfig((command, mode) => {
     plugins: [],
     css: {
       devSourcemap: true ? mode === "dev" : false,
+      preprocessorOptions: {
+        scss: sass.options,
+      },
     },
     json: {
       stringify: true,

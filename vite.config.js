@@ -1,9 +1,10 @@
 "use strict";
 
 import * as vite from "vite";
+import * as cdn from "./lib/build/cdn";
 import * as sass from "./lib/build/sass";
 
-export default vite.defineConfig((command, mode) => {
+export default vite.defineConfig(({ mode }) => {
   /** @type {vite.UserConfig} */
   let defaults = {
     logLevel: "silent" ? mode === "prod" : "info",
@@ -44,7 +45,14 @@ export default vite.defineConfig((command, mode) => {
     },
   };
 
-  let modified = Object.assign({}, defaults);
+  /** @type {vite.UserConfig} */
+  let productionDefaults = {
+    resolve: {
+      alias: cdn.aliases,
+    },
+  };
 
-  return modified;
+  if (mode === "prod") return Object.assign(defaults, productionDefaults);
+
+  return defaults;
 });

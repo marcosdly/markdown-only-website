@@ -1,17 +1,17 @@
 "use strict";
 
+import preact from "@preact/preset-vite";
 import * as vite from "vite";
 import * as cdn from "./lib/build/cdn";
 import * as sass from "./lib/build/sass";
 
 export default vite.defineConfig(({ mode }) => {
-  /** @type {vite.UserConfig} */
-  let defaults = {
-    logLevel: "silent" ? mode === "prod" : "info",
+  let defaults: vite.UserConfig = {
+    logLevel: mode === "prod" ? "silent" : "info",
     appType: "mpa",
-    plugins: [],
+    plugins: [preact()],
     css: {
-      devSourcemap: true ? mode === "dev" : false,
+      devSourcemap: mode === "dev",
       preprocessorOptions: {
         scss: sass.options,
       },
@@ -29,7 +29,7 @@ export default vite.defineConfig(({ mode }) => {
       target: "modules",
       assetsInlineLimit: 0,
       cssMinify: true,
-      minify: "terser" ? mode === "prod" : "esbuild",
+      minify: mode === "prod" ? "terser" : "esbuild",
       assetsDir: "",
       terserOptions: {
         format: { comments: false },
@@ -45,8 +45,7 @@ export default vite.defineConfig(({ mode }) => {
     },
   };
 
-  /** @type {vite.UserConfig} */
-  let productionDefaults = {
+  let productionDefaults: vite.UserConfig = {
     resolve: {
       alias: cdn.aliases,
     },

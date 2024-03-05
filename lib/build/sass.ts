@@ -3,25 +3,14 @@
 import { hexToCSSFilter } from "hex-to-css-filter";
 import * as sass from "sass";
 
-class SassTypeError extends sass.Exception {
-  name = "TypeError";
-
-  /** @param {string} expectedType */
-  constructor(expectedType) {
-    super();
-    this.message = `Given value's type is not '${expectedType}'`;
-  }
-}
-
-/** @type {Record<string, sass.CustomFunction<"sync">>} */
-const customFunctions = {
-  "hex-to-filter($color)": function (color) {
+const customFunctions: Record<string, sass.CustomFunction<"sync">> = {
+  "hex-to-filter($color)": function (color: any) {
     /** @type {sass.SassColor} */
-    const value = color.dartValue;
+    const value: sass.SassColor = color.dartValue;
     try {
       value.assertColor();
     } catch {
-      throw new SassTypeError("Color");
+      throw new TypeError("Should be a color");
     }
 
     // No alpha, and that's apparently common across implementations.
@@ -38,8 +27,7 @@ const customFunctions = {
   },
 };
 
-/** @type {sass.Options<"sync">} */
-export const options = {
+export const options: sass.Options<"sync"> = {
   charset: true,
   functions: customFunctions,
 };

@@ -7,9 +7,11 @@ import { UpperNav } from "./upperNav";
 export function App({ md }: { md: string }) {
   return (
     <>
-      <UpperNav />
-      <Article md={md} />
-      <LowerNav />
+      <div id="content-container">
+        <UpperNav />
+        <Article md={md} />
+        <LowerNav />
+      </div>
     </>
   );
 }

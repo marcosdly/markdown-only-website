@@ -4,13 +4,22 @@
   width: main.$page-width;
   position: sticky;
   top: 0;
-  background-color: main.$background;
   z-index: 1000;
 
   nav {
     height: 3rem;
     margin-bottom: main.$between-around-margin;
-    border-bottom: 1px solid main.$foreground;
+    background: linear-gradient(to top, main.$background-darker, main.$background);
+    position: relative;
+  }
+
+  nav::after {
+    content: "";
+    height: 1px;
+    width: calc(main.$page-width - main.$between-around-margin);
+    background-color: main.$foreground;
+    position: absolute;
+    bottom: 0;
   }
 
   nav,

@@ -13,9 +13,21 @@
   padding: 0.3rem 1rem;
   box-sizing: border-box;
   color: main.$foreground;
-  border-top: 1px solid main.$foreground;
+  // background: linear-gradient(to bottom, main.$background-darker, main.$background);
+  background-color: main.$background-darker;
+  position: relative;
   // position: sticky;
   // bottom: -10%;
+}
+
+#lower-nav::before {
+  content: "";
+  height: 1px;
+  width: main.$page-width;
+  background-color: main.$foreground;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .footer-section {

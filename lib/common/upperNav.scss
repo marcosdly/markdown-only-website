@@ -1,0 +1,53 @@
+@use "./main.scss" as main;
+
+#upper-nav {
+  width: main.$page-width;
+  border-bottom: 1px solid main.$foreground;
+  position: relative;
+
+  nav {
+    height: 3rem;
+  }
+
+  nav,
+  ol {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  li {
+    list-style: none;
+  }
+
+  li:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+
+  .title {
+    margin: 0 1rem;
+    text-transform: uppercase;
+  }
+
+  a {
+    text-decoration: none;
+    color: main.$foreground;
+    position: relative;
+  }
+
+  a::after {
+    content: "";
+    background-color: main.$foreground;
+    height: 2px;
+    width: 0;
+    display: block;
+    position: absolute;
+    bottom: -5px;
+    transition: width 0.5s ease;
+  }
+
+  a:hover::after {
+    width: 100%;
+  }
+}

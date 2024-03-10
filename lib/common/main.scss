@@ -13,6 +13,7 @@ $shadow-color: #333a;
 
 body {
   height: 100vh;
+  background-color: $background;
 }
 
 #app {
@@ -21,6 +22,7 @@ body {
   align-items: center;
   justify-content: start;
   height: inherit;
+  overflow-y: scroll;
 }
 
 .lexend-font {

@@ -3,7 +3,10 @@
 #upper-nav {
   width: main.$page-width;
   border-bottom: 1px solid main.$foreground;
-  position: relative;
+  position: sticky;
+  top: 0;
+  background-color: main.$background;
+  z-index: 1000;
 
   nav {
     height: 3rem;

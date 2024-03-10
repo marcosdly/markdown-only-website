@@ -42,7 +42,7 @@
   }
 
   p {
-    text-indent: 0.8rem;
+    // text-indent: 0.8rem;
     text-justify: inter-word;
     text-align: justify;
     font-size: 11pt;
@@ -56,21 +56,6 @@
   h6 {
     margin-bottom: 1rem;
   }
-
-  //   h1,
-  //   h2 {
-  //     margin-bottom: 1rem;
-  //   }
-
-  //   h3,
-  //   h4 {
-  //     margin-bottom: 0.5rem;
-  //   }
-
-  //   h5,
-  //   h6 {
-  //     margin-bottom: 0.5rem;
-  //   }
 
   ul {
     margin-left: 0.5rem;
@@ -86,6 +71,17 @@
     position: relative;
   }
 
+  ol li {
+    text-align: left;
+    margin-left: 2rem;
+    // list-style-position: inside;
+
+    &::marker {
+      font-size: 10pt;
+      font-family: "DM Mono", monospace;
+    }
+  }
+
   li p {
     text-indent: 0;
   }
@@ -94,10 +90,10 @@
     content: "*";
     position: absolute;
     left: -0.6rem;
-    // font-size: 13pt;
+    font-size: 9pt;
     vertical-align: middle;
-    // line-height: 5pt;
-    font-family: "Lexend", sans-serif;
+    // line-height: 1;
+    font-family: "DM Mono", sans-serif;
   }
 
   li:not(:last-child) {

@@ -2,7 +2,6 @@
 
 #upper-nav {
   width: main.$page-width;
-  border-bottom: 1px solid main.$foreground;
   position: sticky;
   top: 0;
   background-color: main.$background;
@@ -10,6 +9,8 @@
 
   nav {
     height: 3rem;
+    margin-bottom: main.$between-around-margin;
+    border-bottom: 1px solid main.$foreground;
   }
 
   nav,

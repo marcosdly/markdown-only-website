@@ -2,6 +2,7 @@
 
 import preact from "@preact/preset-vite";
 import * as vite from "vite";
+import rawLoader from "vite-raw-plugin";
 import * as cdn from "./lib/build/cdn";
 import * as sass from "./lib/build/sass";
 
@@ -9,7 +10,7 @@ export default vite.defineConfig(({ mode }) => {
   let defaults: vite.UserConfig = {
     logLevel: mode === "prod" ? "silent" : "info",
     appType: "mpa",
-    plugins: [preact()],
+    plugins: [preact(), rawLoader({ fileRegex: /\.md$/ })],
     css: {
       devSourcemap: mode === "dev",
       preprocessorOptions: {
@@ -35,7 +36,7 @@ export default vite.defineConfig(({ mode }) => {
         format: { comments: false },
       },
       rollupOptions: {
-        input: ["./index.html"],
+        input: ["./index.html", "./404.html"],
         preserveEntrySignatures: "allow-extension",
         output: {
           preserveModules: false,

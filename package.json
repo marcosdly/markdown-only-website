@@ -62,6 +62,7 @@
     "webdriverio": "8.33.0"
   },
   "dependencies": {
+    "bootstrap": "5.3.3",
     "dompurify": "3.0.8",
     "highlight.js": "11.9.0",
     "markdown-it": "14.0.0",

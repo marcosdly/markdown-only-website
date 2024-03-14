@@ -3,7 +3,7 @@ import {
   toFirestoreTypeName,
   toHtmlInputType,
   typedFields,
-} from "../../../firebase/schema";
+} from "../../firebase/schema";
 
 interface FieldProps {
   fieldName: string;

@@ -4,7 +4,7 @@ import MainContext from "../../admin/MainContext";
 import Login from "./Login";
 
 interface ButtonProps {
-  title: string;
+  icon: string;
   component: VNode;
 }
 
@@ -12,7 +12,7 @@ interface MiscButtonProps {
   previousComponent: VNode;
 }
 
-function Button({ title, component }: ButtonProps) {
+function Button({ icon, component }: ButtonProps) {
   const setState = useContext(MainContext);
 
   const onClick = (ev: MouseEvent) => {
@@ -22,15 +22,15 @@ function Button({ title, component }: ButtonProps) {
 
   return (
     <button className="local-misc-button btn btn-warning" onClick={onClick}>
-      {title}
+      <i className={"bi " + icon}></i>
     </button>
   );
 }
 
 export function ReturnButton({ previousComponent }: MiscButtonProps) {
-  return <Button title="<-" component={previousComponent} />;
+  return <Button icon="bi-arrow-return-left" component={previousComponent} />;
 }
 
 export function LogOutButton() {
-  return <Button title="Log Out" component={<Login />} />;
+  return <Button icon="bi-box-arrow-left" component={<Login />} />;
 }

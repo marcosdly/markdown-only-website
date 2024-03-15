@@ -1,6 +1,7 @@
 import { type VNode } from "preact";
 import { useContext } from "preact/hooks";
 import MainContext from "../../admin/MainContext";
+import { LogOutButton } from "./MiscButtons";
 import PostManager from "./PostManager";
 
 interface PageButtonProps {
@@ -31,6 +32,7 @@ function PageButton({ title, component }: PageButtonProps) {
 export default function PanelSelector() {
   return (
     <>
+      <LogOutButton />
       <PageButton title="Blog Posts Manager" component={<PostManager />} />
     </>
   );

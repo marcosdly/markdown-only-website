@@ -1,17 +1,16 @@
 import { type VNode } from "preact";
+import { useContext } from "preact/hooks";
+import MainContext from "../../admin/MainContext";
 import PostManager from "./PostManager";
 
 interface PageButtonProps {
   title: string;
-  setState: Function;
   component: VNode;
 }
 
-interface PanelSelectorProps {
-  setState: Function;
-}
+function PageButton({ title, component }: PageButtonProps) {
+  const setState = useContext(MainContext);
 
-function PageButton({ title, setState, component }: PageButtonProps) {
   const onClick = (event: MouseEvent) => {
     event.preventDefault();
     setState(component);
@@ -29,14 +28,10 @@ function PageButton({ title, setState, component }: PageButtonProps) {
   );
 }
 
-export default function PanelSelector({ setState }: PanelSelectorProps) {
+export default function PanelSelector() {
   return (
     <>
-      <PageButton
-        title="Blog Posts Manager"
-        setState={setState}
-        component={<PostManager />}
-      />
+      <PageButton title="Blog Posts Manager" component={<PostManager />} />
     </>
   );
 }

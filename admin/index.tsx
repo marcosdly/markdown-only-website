@@ -1,15 +1,17 @@
 import { VNode, render } from "preact";
-import { useEffect, useState } from "preact/hooks";
-import PanelSelector from "../lib/components/admin/PanelSelector";
 
+import { useState } from "preact/hooks";
+import MainContext from "../lib/admin/MainContext";
+import PanelSelector from "../lib/components/admin/PanelSelector";
 import "./blogpost-manager.scss";
 
 function App() {
-  const [component, setComponent] = useState({} as VNode);
-
-  useEffect(() => setComponent(<PanelSelector setState={setComponent} />), []);
-
-  return <>{component}</>;
+  const [state, setState] = useState<VNode>(<PanelSelector />);
+  return (
+    <>
+      <MainContext.Provider value={setState}>{state}</MainContext.Provider>
+    </>
+  );
 }
 
 const app = document.getElementById("app");

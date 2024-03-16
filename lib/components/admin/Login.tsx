@@ -1,11 +1,12 @@
 import { AuthError, signInWithEmailAndPassword } from "firebase/auth";
 import { VNode } from "preact";
-import { StateUpdater, useContext } from "preact/hooks";
+import { StateUpdater, useContext, useEffect } from "preact/hooks";
 import MainContext from "../../admin/MainContext";
-import { auth } from "../../firebase/app";
+import { auth, isLogged } from "../../firebase/app";
 import PanelSelector from "./PanelSelector";
 
 class AnonymousError extends Error {}
+const postLoginComponent = <PanelSelector />;
 
 function getUserVerifyEvent(setState: StateUpdater<VNode>) {
   return (ev: MouseEvent) => {
@@ -25,7 +26,7 @@ function getUserVerifyEvent(setState: StateUpdater<VNode>) {
         button.classList.add("btn-primary");
         button.value = "Logged!";
 
-        setState(<PanelSelector />);
+        setState(postLoginComponent);
       })
       .catch((err: AuthError | AnonymousError) => {
         if (err instanceof AnonymousError) button.value = "Cannot login as anonymous";
@@ -49,8 +50,22 @@ function getUserVerifyEvent(setState: StateUpdater<VNode>) {
   };
 }
 
+async function checkUserLogin(setState: StateUpdater<VNode>) {
+  while (true) {
+    if (isLogged()) {
+      setState(postLoginComponent);
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+}
+
 export default function Login() {
   const setState = useContext(MainContext);
+
+  useEffect(() => {
+    checkUserLogin(setState);
+  }, []);
 
   const inputClasses = "p-1 rounded bg-dark border border-primary text-white";
   return (

@@ -2,11 +2,11 @@ import { VNode, render } from "preact";
 
 import { useState } from "preact/hooks";
 import MainContext from "../lib/admin/MainContext";
-import PanelSelector from "../lib/components/admin/PanelSelector";
+import Login from "../lib/components/admin/Login";
 import "./blogpost-manager.scss";
 
 function App() {
-  const [state, setState] = useState<VNode>(<PanelSelector />);
+  const [state, setState] = useState<VNode>(<Login />);
   return (
     <>
       <MainContext.Provider value={setState}>{state}</MainContext.Provider>

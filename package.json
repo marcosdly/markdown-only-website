@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite -m dev",
     "build": "tsc && vite build -m dev",
+    "build:watch": "vite build -w -m dev",
     "build:prod": "tsc && vite build -m prod",
     "test": "vitest"
   },
@@ -37,13 +38,15 @@
       "marked-smartypants-lite": "lib/index.umd.js",
       "marked-directive": "dist/index.umd.js",
       "dompurify": "dist/purify.min.js",
-      "@highlightjs/cdn-assets": "highlight.min.js"
+      "@highlightjs/cdn-assets": "highlight.min.js",
+      "bootstrap": "dist/js/bootstrap.bundle.min.js"
     }
   },
   "devDependencies": {
     "@preact/preset-vite": "2.8.1",
     "@prettier/plugin-xml": "3.2.2",
     "@testing-library/preact": "3.2.3",
+    "@types/bootstrap": "5.2.10",
     "@types/dompurify": "3.0.5",
     "@types/markdown-it": "13.0.7",
     "@types/node": "20.11.24",
@@ -64,6 +67,7 @@
   "dependencies": {
     "bootstrap": "5.3.3",
     "dompurify": "3.0.8",
+    "firebase": "10.8.1",
     "highlight.js": "11.9.0",
     "markdown-it": "14.0.0",
     "markdown-it-container": "4.0.0",
@@ -72,6 +76,7 @@
     "markdown-it-footnote": "4.0.0",
     "markdown-it-sub": "2.0.0",
     "markdown-it-sup": "2.0.0",
-    "preact": "10.19.6"
+    "preact": "10.19.6",
+    "yup": "1.4.0"
   }
 }

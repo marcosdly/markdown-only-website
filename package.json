@@ -19,40 +19,12 @@
   "author": "Marcos Gabriel <dev.marcosdly@gmail.com>",
   "license": "MPL-2.0",
   "homepage": "https://marcosdly.dev",
-  "cdnAlias": {
-    "regex": {
-      "preact": {
-        "expr": "preact(\\/.*)?",
-        "path": "dist/preact.min.umd.js"
-      }
-    },
-    "replace": {
-      "highlight.js": "@highlightjs/cdn-assets"
-    },
-    "npm": {
-      "marked": "marked.min.js",
-      "marked-base-url": "lib/index.umd.js",
-      "marked-footnote": "dist/index.umd.min.js",
-      "marked-extended-tables": "lib/index.umd.js",
-      "marked-highlight": "lib/index.umd.js",
-      "marked-smartypants-lite": "lib/index.umd.js",
-      "marked-directive": "dist/index.umd.js",
-      "dompurify": "dist/purify.min.js",
-      "@highlightjs/cdn-assets": "highlight.min.js",
-      "bootstrap": "dist/js/bootstrap.bundle.min.js"
-    }
-  },
   "devDependencies": {
     "@preact/preset-vite": "2.8.1",
     "@prettier/plugin-xml": "3.2.2",
     "@testing-library/preact": "3.2.3",
-    "@types/bootstrap": "5.2.10",
-    "@types/dompurify": "3.0.5",
-    "@types/markdown-it": "13.0.7",
     "@types/node": "20.11.24",
     "@vitest/browser": "1.3.1",
-    "hex-to-css-filter": "5.4.0",
-    "preact-render-to-string": "6.4.0",
     "prettier": "3.2.5",
     "prettier-plugin-jsdoc": "1.3.0",
     "prettier-plugin-organize-imports": "3.2.4",
@@ -61,22 +33,10 @@
     "typescript": "5.2.2",
     "vite": "5.1.1",
     "vite-raw-plugin": "1.0.2",
-    "vitest": "1.3.0",
-    "webdriverio": "8.33.0"
+    "vitest": "1.3.0"
   },
   "dependencies": {
-    "bootstrap": "5.3.3",
-    "dompurify": "3.0.8",
     "firebase": "10.8.1",
-    "highlight.js": "11.9.0",
-    "markdown-it": "14.0.0",
-    "markdown-it-container": "4.0.0",
-    "markdown-it-deflist": "3.0.0",
-    "markdown-it-emoji": "3.0.0",
-    "markdown-it-footnote": "4.0.0",
-    "markdown-it-sub": "2.0.0",
-    "markdown-it-sup": "2.0.0",
-    "preact": "10.19.6",
-    "yup": "1.4.0"
+    "preact": "10.19.6"
   }
 }

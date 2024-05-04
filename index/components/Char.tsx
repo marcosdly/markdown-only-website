@@ -1,5 +1,4 @@
 import { Component } from "preact";
-import { useEffect } from "preact/hooks";
 
 interface CharOptions {
   letter: string;
@@ -53,7 +52,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
 
   private centerPosition(index: number, length: number): Position {
     const w = document.documentElement.offsetWidth,
-      columnCenter = (w / length / w) * 1e2,
+      columnCenter = w / (length + 1) / w * 1e2,
       left = columnCenter * (index + 1);
 
     return { top: 50, left: left, x: 100 - left, y: 50 };

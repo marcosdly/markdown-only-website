@@ -20,6 +20,11 @@ interface PositionStyle {
   transform: string;
 }
 
+interface Point2d {
+  x: number;
+  y: number;
+}
+
 /**
   * - Size dynamically increased according to max index.
   * - Index can be arbitrarilly set.
@@ -34,8 +39,8 @@ export class Char extends Component<CharOptions, PositionStyle> {
   constructor(props: CharOptions) {
     super(props);
     this.references[this.props.index] = this;
-    this.center = this.positionStyle(
-      this.centerPosition(this.props.index, this.props.length),
+    this.center = this.pointToStyle(
+      this.centerPoint(this.props.index, this.props.length),
     );
     this.state = this.center;
   }
@@ -50,19 +55,28 @@ export class Char extends Component<CharOptions, PositionStyle> {
     this.setState(this.center);
   }
 
-  private centerPosition(index: number, length: number): Position {
+  private centerPoint(index: number, length: number): Point2d {
     const w = document.documentElement.offsetWidth,
-      columnCenter = w / (length + 1) / w * 1e2,
-      left = columnCenter * (index + 1);
+      h = document.documentElement.offsetHeight;
 
-    return { top: 50, left: left, x: 100 - left, y: 50 };
+    return { x: w / (length + 1) * (index + 1), y: h / 2 };
   }
 
-  private positionStyle(props: Position): PositionStyle {
+  private pointToPosition(p: Point2d): Position {
+    const w = document.documentElement.offsetWidth,
+      h = document.documentElement.offsetHeight,
+      top = p.y / h * 1e2,
+      negativeX = p.x / w * 1e2;
+
+    return { top: top, left: negativeX, x: 100 - negativeX, y: 100 - top };
+  }
+
+  private pointToStyle(p: Point2d): PositionStyle {
+    const pos = this.pointToPosition(p);
     return {
-      top: `${props.top}%`,
-      left: `${props.left}%`,
-      transform: `translate(-${props.x}%, -${props.y}%)`,
+      top: `${pos.top}%`,
+      left: `${pos.left}%`,
+      transform: `translate(-${pos.x}%, -${pos.y}%)`,
     };
   }
 

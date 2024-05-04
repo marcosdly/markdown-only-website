@@ -1,0 +1,38 @@
+@use "../../lib/common/colors" as color;
+
+$size: 2rem;
+
+#char-container {
+  height: inherit;
+  position: relative;
+}
+
+.char {
+  width: $size;
+  height: $size;
+  position: absolute;
+  border: color.$foreground solid 1px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition:
+    top 1s ease-in-out,
+    left 1s ease-in-out,
+    transform 1s ease-in-out;
+}
+
+.char-link {
+  font-size: $size;
+  font-family: monospace;
+  line-height: 1;
+  // text-transform: uppercase;
+
+  &:active,
+  &:link,
+  &:hover,
+  &:visited {
+    text-decoration: none;
+    color: color.$foreground;
+  }
+}

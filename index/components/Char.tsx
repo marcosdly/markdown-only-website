@@ -1,4 +1,4 @@
-import { Component } from "preact";
+import { Component, RefObject, createRef } from "preact";
 
 interface CharOptions {
   letter: string;
@@ -44,6 +44,8 @@ const globalState__charRefs: Char[] = [];
 export class Char extends Component<CharOptions, PositionStyle> {
   private references = globalState__charRefs;
   private center: PositionStyle;
+  private centerPointCache: Point2d;
+  private charBox: RefObject<HTMLDivElement> = createRef();
   public current: Point2d;
   public activeZIndex: number = 1000;
   public inactiveZIndex: number = 1;
@@ -53,7 +55,8 @@ export class Char extends Component<CharOptions, PositionStyle> {
   constructor(props: CharOptions) {
     super(props);
     this.references[this.props.index] = this;
-    this.current = this.centerPoint(this.props.index, this.props.length);
+    this.centerPointCache = this.centerPoint(this.props.index, this.props.length);
+    this.current = this.centerPointCache;
     this.center = this.pointToStyle(this.current);
     this.state = this.center;
   }
@@ -77,6 +80,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
   }
 
   public resetPosition() {
+    this.current = this.centerPointCache;
     this.setState(this.center);
   }
 
@@ -145,12 +149,15 @@ export class Char extends Component<CharOptions, PositionStyle> {
   }
 
   private onMouseEnter() {
-    this.setState(Object.assign({}, this.state, {zIndex: this.activeZIndex.toString()}));
+    const elemBox = this.charBox.current!.getBoundingClientRect();
+    const currentPoint: Point2d = {x: this.squareSideSize / 2 + elemBox.x, y: this.squareSideSize / 2 + elemBox.y};
+    const style = Object.assign({}, this.pointToStyle(currentPoint), { zIndex: this.activeZIndex.toString() });
+    this.current = currentPoint;
+    this.setState(style);
     this.spread();
   }
 
   private onMouseLeave() {
-    this.setState(Object.assign({}, this.state, {zIndex:this.inactiveZIndex.toString()}));
     this.gatter();
   }
 
@@ -160,6 +167,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
         className="char"
         onMouseEnter={() => this.onMouseEnter()}
         onMouseLeave={() => this.onMouseLeave()}
+        ref={this.charBox}
         style={this.state}
       >
         <a className="char-link" href={this.props.href}>

@@ -44,7 +44,7 @@ const globalState__charRefs: Char[] = [];
 export class Char extends Component<CharOptions, PositionStyle> {
   private references = globalState__charRefs;
   private center: PositionStyle;
-  private centerPointCache: Point2d;
+  private centerPoint: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
   public current: Point2d;
   public activeZIndex: number = 1000;
@@ -55,9 +55,9 @@ export class Char extends Component<CharOptions, PositionStyle> {
   constructor(props: CharOptions) {
     super(props);
     this.references[this.props.index] = this;
-    this.centerPointCache = this.centerPoint(this.props.index, this.props.length);
-    this.current = this.centerPointCache;
-    this.center = this.pointToStyle(this.current);
+    this.centerPoint = this.getCenterPoint();
+    this.center = this.pointToStyle(this.centerPoint);
+    this.current = this.centerPoint;
     this.state = this.center;
   }
 
@@ -80,15 +80,15 @@ export class Char extends Component<CharOptions, PositionStyle> {
   }
 
   public resetPosition() {
-    this.current = this.centerPointCache;
+    this.current = this.centerPoint;
     this.setState(this.center);
   }
 
-  private centerPoint(index: number, length: number): Point2d {
+  private getCenterPoint(): Point2d {
     const w = document.documentElement.offsetWidth,
       h = document.documentElement.offsetHeight;
 
-    return { x: w / (length + 1) * (index + 1), y: h / 2 };
+    return { x: w / (this.props.length + 1) * (this.props.index + 1), y: h / 2 };
   }
 
   private randomInRange(min: number, max:number): number {

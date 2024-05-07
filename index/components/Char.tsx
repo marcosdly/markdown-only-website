@@ -18,6 +18,7 @@ interface PositionStyle {
   top: string;
   left: string;
   transform: string;
+  zIndex: string;
 }
 
 interface Point2d {
@@ -44,6 +45,8 @@ export class Char extends Component<CharOptions, PositionStyle> {
   private references = globalState__charRefs;
   private center: PositionStyle;
   public current: Point2d;
+  public activeZIndex: number = 1000;
+  public inactiveZIndex: number = 1;
 
   constructor(props: CharOptions) {
     super(props);
@@ -135,15 +138,26 @@ export class Char extends Component<CharOptions, PositionStyle> {
       top: `${pos.top}%`,
       left: `${pos.left}%`,
       transform: `translate(-${pos.x}%, -${pos.y}%)`,
+      zIndex: this.inactiveZIndex.toString(),
     };
+  }
+
+  private onMouseEnter() {
+    this.setState(Object.assign({}, this.state, {zIndex: this.activeZIndex.toString()}));
+    this.spread();
+  }
+
+  private onMouseLeave() {
+    this.setState(Object.assign({}, this.state, {zIndex:this.inactiveZIndex.toString()}));
+    this.gatter();
   }
 
   render() {
     return (
       <div
         className="char"
-        onMouseEnter={() => this.spread()}
-        onMouseLeave={() => this.gatter()}
+        onMouseEnter={() => this.onMouseEnter()}
+        onMouseLeave={() => this.onMouseLeave()}
         style={this.state}
       >
         <a className="char-link" href={this.props.href}>

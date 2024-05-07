@@ -60,7 +60,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
       do
         p = this.arbitraryPoint();
       while (this.references.some(
-        (c) => this.squareContainsPoint(p, this.pointToSquare(c.current, 32))
+        (c) => this.squaresAroundOverlap(p, c.current)
       ));
       char.current = p;
       char.setState(this.pointToStyle(p));
@@ -116,6 +116,17 @@ export class Char extends Component<CharOptions, PositionStyle> {
     const horizontaly = sqr.topLeft.x <= p.x && sqr.topRight.x >= p.x;
     const verticaly = sqr.topLeft.y <= p.y && sqr.bottomLeft.y >= p.y;
     return horizontaly && verticaly;
+  }
+
+  private squaresAroundOverlap(overlaped: Point2d, overlaps: Point2d): boolean {
+    const square = this.pointToSquare(overlaped, 32);
+    const overlapping = this.pointToSquare(overlaps, 32);
+    return (
+      this.squareContainsPoint(overlapping.topLeft, square)
+      || this.squareContainsPoint(overlapping.topRight, square)
+      || this.squareContainsPoint(overlapping.bottomLeft, square)
+      || this.squareContainsPoint(overlapping.bottomRight, square)
+    );
   }
 
   private pointToStyle(p: Point2d): PositionStyle {

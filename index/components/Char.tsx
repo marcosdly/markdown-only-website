@@ -47,6 +47,8 @@ export class Char extends Component<CharOptions, PositionStyle> {
   public current: Point2d;
   public activeZIndex: number = 1000;
   public inactiveZIndex: number = 1;
+  /** Number in pixels */
+  public squareSideSize: number = 32;
 
   constructor(props: CharOptions) {
     super(props);
@@ -92,7 +94,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
   private arbitraryPoint(): Point2d {
     const w = document.documentElement.offsetWidth,
       h = document.documentElement.offsetHeight;
-    return { x: this.randomInRange(1, w), y: this.randomInRange(1, h) };
+    return { x: this.randomInRange(this.squareSideSize, w - this.squareSideSize), y: this.randomInRange(this.squareSideSize, h - this.squareSideSize) };
   }
 
   private pointToPosition(p: Point2d): Position {
@@ -122,8 +124,8 @@ export class Char extends Component<CharOptions, PositionStyle> {
   }
 
   private squaresAroundOverlap(overlaped: Point2d, overlaps: Point2d): boolean {
-    const square = this.pointToSquare(overlaped, 32);
-    const overlapping = this.pointToSquare(overlaps, 32);
+    const square = this.pointToSquare(overlaped, this.squareSideSize);
+    const overlapping = this.pointToSquare(overlaps, this.squareSideSize);
     return (
       this.squareContainsPoint(overlapping.topLeft, square)
       || this.squareContainsPoint(overlapping.topRight, square)

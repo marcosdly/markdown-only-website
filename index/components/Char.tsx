@@ -1,4 +1,5 @@
 import { Component, RefObject, createRef } from "preact";
+import { DragState } from "../dragState";
 
 interface CharOptions {
   letter: string;
@@ -46,6 +47,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
   private center: PositionStyle;
   private centerPoint: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
+  public beingDragged: boolean;
   public current: Point2d;
   public activeZIndex: number = 1000;
   public inactiveZIndex: number = 1;
@@ -59,6 +61,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
     this.center = this.pointToStyle(this.centerPoint);
     this.current = this.centerPoint;
     this.state = this.center;
+    this.beingDragged = false;
   }
 
   private spread() {
@@ -75,11 +78,12 @@ export class Char extends Component<CharOptions, PositionStyle> {
     });
   }
 
-  private gatter() {
+  public gatter() {
     this.references.forEach((char) => char.resetPosition());
   }
 
   public resetPosition() {
+    this.beingDragged = false;
     this.current = this.centerPoint;
     this.setState(this.center);
   }
@@ -138,27 +142,68 @@ export class Char extends Component<CharOptions, PositionStyle> {
     );
   }
 
-  private pointToStyle(p: Point2d): PositionStyle {
+  private pointToStyle(p: Point2d, above: boolean = false): PositionStyle {
     const pos = this.pointToPosition(p);
     return {
       top: `${pos.top}%`,
       left: `${pos.left}%`,
       transform: `translate(-${pos.x}%, -${pos.y}%)`,
-      zIndex: this.inactiveZIndex.toString(),
+      zIndex: above ? this.activeZIndex.toString() : this.inactiveZIndex.toString(),
     };
   }
 
   private onMouseEnter() {
+    if (this.references.some((char) => char.beingDragged)) return;
     const elemBox = this.charBox.current!.getBoundingClientRect();
     const currentPoint: Point2d = {x: this.squareSideSize / 2 + elemBox.x, y: this.squareSideSize / 2 + elemBox.y};
-    const style = Object.assign({}, this.pointToStyle(currentPoint), { zIndex: this.activeZIndex.toString() });
+    const style = this.pointToStyle(currentPoint, true);
     this.current = currentPoint;
     this.setState(style);
     this.spread();
   }
 
   private onMouseLeave() {
+    if (this.references.some((char) => char.beingDragged)) return;
     this.gatter();
+  }
+
+  private onMouseDown() {
+    this.beingDragged = true;
+    DragState.instance.setCharInstance(this);
+    if (DragState.instance.isDragCanvasInitialized)
+      DragState.instance.dragCanvas!.rise();
+  }
+
+  private onMouseUp() {
+    this.beingDragged = false;
+    if (DragState.instance.isDragCanvasInitialized)
+      DragState.instance.dragCanvas!.reset();
+  }
+
+  public drag(ev: MouseEvent | Point2d) {
+    if (!this.beingDragged) return;
+
+    const w = document.documentElement.offsetWidth,
+      h = document.documentElement.offsetHeight;
+
+    let x: number, y: number;
+
+    if (ev.x >= w - this.squareSideSize)
+      x = w - this.squareSideSize;
+    else if (ev.x <= this.squareSideSize)
+      x = this.squareSideSize;
+    else
+      x = ev.x;
+
+    if (ev.y >= h - this.squareSideSize)
+      y = h - this.squareSideSize;
+    else if (ev.y <= this.squareSideSize)
+      y = this.squareSideSize;
+    else
+      y = ev.y;
+
+    this.current = { x: x, y: y };
+    this.setState(this.pointToStyle(this.current, true));
   }
 
   render() {
@@ -167,6 +212,9 @@ export class Char extends Component<CharOptions, PositionStyle> {
         className="char"
         onMouseEnter={() => this.onMouseEnter()}
         onMouseLeave={() => this.onMouseLeave()}
+        onMouseDown={() => this.onMouseDown()}
+        onMouseUp={() => this.onMouseUp()}
+        onMouseMove={(ev) => this.drag(ev)}
         ref={this.charBox}
         style={this.state}
       >

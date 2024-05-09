@@ -26,6 +26,8 @@ $size: 2rem;
   font-size: $size;
   font-family: monospace;
   line-height: 1;
+  pointer-events: none;
+  user-select: none;
   // text-transform: uppercase;
 
   &:active,

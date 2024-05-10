@@ -253,6 +253,19 @@ export class Char extends Component<CharOptions, PositionStyle> {
       y = from.y + offset;
     }
 
+    const w = document.documentElement.offsetWidth,
+      h = document.documentElement.offsetHeight;
+
+    if (x <= this.squareSideSize)
+      x = this.squareSideSize;
+    else if (x >= w - this.squareSideSize)
+      x = w - this.squareSideSize;
+
+    if (y <= this.squareSideSize)
+      y = this.squareSideSize;
+    else if (y >= h - this.squareSideSize)
+      y = h - this.squareSideSize;
+
     this.current = { x: x, y: y };
     this.setState(this.pointToStyle(this.current));
   }

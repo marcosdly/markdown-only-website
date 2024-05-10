@@ -20,6 +20,7 @@ interface PositionStyle {
   left: string;
   transform: string;
   zIndex: string;
+  transition: "unset" | undefined;
 }
 
 interface Point2d {
@@ -53,6 +54,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
   public inactiveZIndex: number = 1;
   /** Number in pixels */
   public squareSideSize: number = 32;
+  public auraSquareSideSize: number = this.squareSideSize * 3;
 
   constructor(props: CharOptions) {
     super(props);
@@ -144,11 +146,13 @@ export class Char extends Component<CharOptions, PositionStyle> {
 
   private pointToStyle(p: Point2d, above: boolean = false): PositionStyle {
     const pos = this.pointToPosition(p);
+    const anyBeingDragged = this.beingDragged || this.references.some((char) => char.beingDragged);
     return {
       top: `${pos.top}%`,
       left: `${pos.left}%`,
       transform: `translate(-${pos.x}%, -${pos.y}%)`,
       zIndex: above ? this.activeZIndex.toString() : this.inactiveZIndex.toString(),
+      transition: anyBeingDragged ? "unset" : undefined,
     };
   }
 
@@ -180,6 +184,79 @@ export class Char extends Component<CharOptions, PositionStyle> {
       DragState.instance.dragCanvas!.reset();
   }
 
+  public repel(from: Point2d) {
+    if (this.beingDragged) return;
+    const current = this.pointToSquare(this.current, this.squareSideSize);
+    const avoid = this.pointToSquare(from, this.auraSquareSideSize);
+    if (!this.squareContainsPoint(this.current, avoid)) return;
+
+    const halfLetter = this.squareSideSize / 2;
+    const pointsAreEqual = (p1: Point2d, p2: Point2d) => p1.x === p2.x && p1.y === p2.y;
+
+    let x: number, y: number;
+
+    if (pointsAreEqual(avoid.topLeft, current.bottomRight)) {
+      // move top left
+      x = avoid.topLeft.x - halfLetter;
+      y = avoid.topLeft.y - halfLetter;
+    } else if (pointsAreEqual(avoid.topRight, current.bottomLeft)) {
+      // move top right
+      x = avoid.topRight.x + halfLetter;
+      y = avoid.topRight.y - halfLetter;
+    } else if (pointsAreEqual(avoid.bottomLeft, current.topRight)) {
+      // move bottom left
+      x = avoid.bottomLeft.x - halfLetter;
+      y = avoid.bottomLeft.y + halfLetter;
+    } else if (pointsAreEqual(avoid.bottomRight, current.topLeft)) {
+      // move bottom right
+      x = avoid.bottomRight.x + halfLetter;
+      y = avoid.bottomRight.y + halfLetter;
+    }
+
+    if (x! && y!) {
+      this.current = { x: x, y: y };
+      this.setState(this.pointToStyle(this.current));
+      return;
+    }
+
+    const offset = this.auraSquareSideSize / 2 + halfLetter;
+
+    interface Cross {
+      up: number;
+      down: number;
+      left: number;
+      right: number;
+    }
+
+    const letterCross: Cross = {
+      left: this.current.x - halfLetter,
+      right: this.current.x + halfLetter,
+      up: this.current.y - halfLetter,
+      down: this.current.y + halfLetter,
+    };
+
+    if (letterCross.right <= from.x) {
+      // move left
+      x = from.x - offset;
+      y = this.current.y;
+    } else if (letterCross.left >= from.x) {
+      // move right
+      x = from.x + offset;
+      y = this.current.y;
+    } else if (letterCross.down <= from.y) {
+      // move up
+      x = this.current.x;
+      y = from.y - offset;
+    } else {
+      // move down
+      x = this.current.x;
+      y = from.y + offset;
+    }
+
+    this.current = { x: x, y: y };
+    this.setState(this.pointToStyle(this.current));
+  }
+
   public drag(ev: MouseEvent | Point2d) {
     if (!this.beingDragged) return;
 
@@ -204,6 +281,7 @@ export class Char extends Component<CharOptions, PositionStyle> {
 
     this.current = { x: x, y: y };
     this.setState(this.pointToStyle(this.current, true));
+    this.references.forEach((char) => char.repel(this.current));
   }
 
   render() {

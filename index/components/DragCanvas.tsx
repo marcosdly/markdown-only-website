@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import { DragState } from "../dragState";
+import { State } from "../lib/state";
 
 interface Style {
   zIndex: string;
@@ -12,7 +12,7 @@ export class DragCanvas extends Component<unknown, Style> {
   constructor() {
     super();
     this.state = this.inactiveStyle;
-    DragState.instance.setDragCanvasInstance(this);
+    State.instance.setCanvas(this);
   }
 
   public rise() {
@@ -21,16 +21,16 @@ export class DragCanvas extends Component<unknown, Style> {
 
   public sink() {
     this.setState(this.inactiveStyle);
-    if (DragState.instance.isCharInitialized)
-      DragState.instance.char!.gatter();
-    DragState.instance.resetCharInstance();
+    if (State.instance.active) State.instance.getActive()!.gatter();
+    State.instance.inactive();
   }
 
-  public reset() { this.sink(); };
+  public reset() {
+    this.sink();
+  }
 
   private dispatch(ev: MouseEvent) {
-    if (DragState.instance.isCharInitialized)
-      DragState.instance.char!.drag(ev);
+    if (State.instance.active) State.instance.getActive()!.drag(ev);
   }
 
   render() {
@@ -43,8 +43,7 @@ export class DragCanvas extends Component<unknown, Style> {
         onMouseUp={() => this.sink()}
         onMouseMove={(ev) => this.dispatch(ev)}
         style={this.state}
-      >
-      </div>
+      ></div>
     );
   }
 }

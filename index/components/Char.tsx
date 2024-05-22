@@ -1,9 +1,9 @@
 import { Component, RefObject, createRef } from "preact";
 import { default as Victor } from "victor";
-import { DragState } from "../dragState";
 import { Circle } from "../lib/circle";
 import { Point2d } from "../lib/point2d";
 import { Square } from "../lib/square";
+import { State } from "../lib/state";
 import { PositionCSS } from "../lib/style";
 
 interface CharOptions {
@@ -13,15 +13,7 @@ interface CharOptions {
   length: number;
 }
 
-/**
- * - Size dynamically increased according to max index.
- * - Index can be arbitrarilly set.
- * - **Must not be exported**.
- */
-const globalState__charRefs: Char[] = [];
-
 export class Char extends Component<CharOptions, PositionCSS> {
-  private references = globalState__charRefs;
   private center: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
   public beingDragged: boolean;
@@ -34,7 +26,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
 
   constructor(props: CharOptions) {
     super(props);
-    this.references[this.props.index] = this;
+    State.instance.add(this.props.index, this);
     this.center = this.getCenterPoint();
     this.current = this.center;
     this.state = this.center.toStyle().toInlineCSS(this.inactiveZIndex, true);
@@ -45,7 +37,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
     const w = document.documentElement.offsetWidth,
       h = document.documentElement.offsetHeight;
 
-    this.references.forEach((char) => {
+    State.instance.chars.forEach((char, _, arr) => {
       if (char.props.index === this.props.index) return;
       let randomSquare: Square, anyOverlap: boolean;
       do {
@@ -53,7 +45,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
           Point2d.random(w, h, this.squareSideSize),
           this.squareSideSize,
         );
-        anyOverlap = this.references.some((char) =>
+        anyOverlap = arr.some((char) =>
           randomSquare.overlap(new Square(char.current, this.squareSideSize)),
         );
       } while (anyOverlap);
@@ -65,7 +57,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
   }
 
   public gatter() {
-    this.references.forEach((char) => char.resetPosition());
+    State.instance.chars.forEach((char) => char.resetPosition());
   }
 
   public resetPosition() {
@@ -82,7 +74,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
   }
 
   private onMouseEnter() {
-    if (this.references.some((char) => char.beingDragged)) return;
+    if (State.instance.chars.some((char) => char.beingDragged)) return;
     const elemBox = this.charBox.current!.getBoundingClientRect();
     const current: Point2d = new Point2d(
       this.squareSideSize / 2 + elemBox.x,
@@ -95,21 +87,20 @@ export class Char extends Component<CharOptions, PositionCSS> {
   }
 
   private onMouseLeave() {
-    if (this.references.some((char) => char.beingDragged)) return;
+    if (State.instance.chars.some((char) => char.beingDragged)) return;
     this.gatter();
   }
 
   private onMouseDown() {
     this.beingDragged = true;
-    DragState.instance.setCharInstance(this);
-    if (DragState.instance.isDragCanvasInitialized)
-      DragState.instance.dragCanvas!.rise();
+    State.instance.setActive(this.props.index);
+    if (State.instance.canvas) State.instance.canvas.rise();
   }
 
   private onMouseUp() {
     this.beingDragged = false;
-    if (DragState.instance.isDragCanvasInitialized)
-      DragState.instance.dragCanvas!.reset();
+    State.instance.inactive();
+    if (State.instance.canvas) State.instance.canvas.reset();
   }
 
   public repel(from: Point2d) {
@@ -159,7 +150,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
 
     this.current = new Point2d(x, y);
     this.setState(this.current.toStyle().toInlineCSS(this.activeZIndex, false));
-    this.references.forEach((char) => char.repel(this.current));
+    State.instance.chars.forEach((char) => char.repel(this.current));
   }
 
   render() {

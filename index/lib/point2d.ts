@@ -29,6 +29,10 @@ export class Point2d {
     );
   }
 
+  public static fromObject(obj: any): Point2d {
+    return new this(obj.x, obj.y);
+  }
+
   public equals(other: Point2d): boolean {
     return this.x === other.x && this.y === other.y;
   }

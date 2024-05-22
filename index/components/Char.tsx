@@ -1,6 +1,7 @@
 import { Component, RefObject, createRef } from "preact";
+import { default as Victor } from "victor";
 import { DragState } from "../dragState";
-import { Direction, relativeDirection } from "../lib/direction";
+import { Circle } from "../lib/circle";
 import { Point2d } from "../lib/point2d";
 import { Square } from "../lib/square";
 import { PositionCSS } from "../lib/style";
@@ -29,7 +30,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
   public inactiveZIndex: number = 1;
   /** Number in pixels */
   public squareSideSize: number = 32;
-  public auraSquareSideSize: number = this.squareSideSize * 3;
+  public auraRadius: number = this.squareSideSize * 3;
 
   constructor(props: CharOptions) {
     super(props);
@@ -113,74 +114,30 @@ export class Char extends Component<CharOptions, PositionCSS> {
 
   public repel(from: Point2d) {
     if (this.beingDragged) return;
-    const current = new Square(this.current, this.squareSideSize);
-    const avoid = new Square(from, this.auraSquareSideSize);
-    if (!current.overlap(avoid)) return;
+    const avoid = new Circle(from, this.auraRadius);
+    if (!avoid.containsPoint(this.current)) return;
 
-    const halfLetter = this.squareSideSize / 2;
-
-    let x: number, y: number;
-
-    if (avoid.topleft.equals(current.bottomright)) {
-      // move top left
-      x = avoid.topleft.x - halfLetter;
-      y = avoid.topleft.y - halfLetter;
-    } else if (avoid.topright.equals(current.bottomleft)) {
-      // move top right
-      x = avoid.topright.x + halfLetter;
-      y = avoid.topright.y - halfLetter;
-    } else if (avoid.bottomleft.equals(current.topright)) {
-      // move bottom left
-      x = avoid.bottomleft.x - halfLetter;
-      y = avoid.bottomleft.y + halfLetter;
-    } else if (avoid.bottomright.equals(current.topleft)) {
-      // move bottom right
-      x = avoid.bottomright.x + halfLetter;
-      y = avoid.bottomright.y + halfLetter;
-    }
-
-    if (x! && y!) {
-      this.current = new Point2d(x, y);
-      this.setState(this.current.toStyle().toInlineCSS(this.inactiveZIndex, false));
-      return;
-    }
-
-    const offset = this.auraSquareSideSize / 2 + halfLetter;
-    const dir: Direction = relativeDirection(from, this.current);
-
-    switch (dir) {
-      case Direction.LEFT:
-        x = from.x - offset;
-        y = this.current.y;
-        break;
-      case Direction.RIGHT:
-        x = from.x + offset;
-        y = this.current.y;
-        break;
-      case Direction.UP:
-        x = this.current.x;
-        y = from.y - offset;
-        break;
-      case Direction.DOWN:
-      default:
-        x = this.current.x;
-        y = from.y + offset;
-        break;
-    }
+    const relative = Victor.fromObject(from);
+    const final = Victor.fromObject(this.current)
+      .subtract(relative)
+      .normalize()
+      .multiplyScalar(this.auraRadius);
 
     // prevent out of bounds ...
     {
       const w = document.documentElement.offsetWidth,
-        h = document.documentElement.offsetHeight;
+        h = document.documentElement.offsetHeight,
+        tmpFinal = final.clone().add(relative);
 
-      if (x <= this.squareSideSize) x = this.squareSideSize;
-      else if (x >= w - this.squareSideSize) x = w - this.squareSideSize;
+      if (tmpFinal.x <= this.squareSideSize || tmpFinal.x >= w - this.squareSideSize)
+        final.invertX();
 
-      if (y <= this.squareSideSize) y = this.squareSideSize;
-      else if (y >= h - this.squareSideSize) y = h - this.squareSideSize;
+      if (tmpFinal.y <= this.squareSideSize || tmpFinal.y >= h - this.squareSideSize)
+        final.invertY();
     }
 
-    this.current = new Point2d(x, y);
+    final.add(relative);
+    this.current = Point2d.fromObject(final);
     this.setState(this.current.toStyle().toInlineCSS(this.inactiveZIndex, false));
   }
 

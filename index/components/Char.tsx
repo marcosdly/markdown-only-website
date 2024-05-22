@@ -73,6 +73,10 @@ export class Char extends Component<CharOptions, PositionCSS> {
     return new Point2d((w / (this.props.length + 1)) * (this.props.index + 1), h / 2);
   }
 
+  public updateCenter() {
+    this.center = this.getCenterPoint();
+  }
+
   private onMouseEnter() {
     if (State.instance.chars.some((char) => char.beingDragged)) return;
     const elemBox = this.charBox.current!.getBoundingClientRect();

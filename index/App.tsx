@@ -1,6 +1,7 @@
 import { useEffect } from "preact/hooks";
 import { Char } from "./components/Char";
 import { DragCanvas } from "./components/DragCanvas";
+import { characters } from "./lib/content";
 import { State } from "./lib/state";
 
 export function App() {
@@ -13,17 +14,16 @@ export function App() {
     });
   }, []);
 
-  const components = "GoldmanYayCool"
-    .split("")
-    .map((c, i, arr) => (
-      <Char
-        href=""
-        letter={c}
-        icon={arr[arr.length - (i + 1)]}
-        index={i}
-        length={arr.length}
-      />
-    ));
+  const components = characters.map((info, i, arr) => (
+    <Char
+      href={info.url}
+      letter={info.letter}
+      iconPath={info.iconPath}
+      index={i}
+      length={arr.length}
+    />
+  ));
+
   return (
     <>
       <DragCanvas />

@@ -159,18 +159,6 @@ export class Char extends Component<CharOptions, CharState> {
     if (State.instance.canvas) State.instance.canvas.reset();
   }
 
-  private onTransitionEnd() {
-    if (!this.charBox.current) return;
-    if (
-      this.charBox.current.classList.contains(CharAnimation.OUTOFBOUNDS) ||
-      this.charBox.current.classList.contains(CharAnimation.SPREAD)
-    ) {
-      this.setAnimation(CharAnimation.NONE);
-    }
-
-    this.releaseAnimationLock();
-  }
-
   private releaseAnimationLock() {
     this.repositioning = false;
   }
@@ -215,6 +203,7 @@ export class Char extends Component<CharOptions, CharState> {
     }
 
     final.add(relative);
+    this.setAnimation(CharAnimation.NONE);
     this.setPosition(Point2d.fromObject(final), this.inactiveZIndex);
   }
 
@@ -246,8 +235,8 @@ export class Char extends Component<CharOptions, CharState> {
         onMouseLeave={() => this.interrupt()}
         onMouseDown={() => this.startDragging()}
         onMouseUp={() => this.stopAndReset()}
-        onTransitionRun={() => this.acquireAnimationLock()}
-        onTransitionEnd={() => this.onTransitionEnd()}
+        onTransitionStart={() => this.acquireAnimationLock()}
+        onTransitionEnd={() => this.releaseAnimationLock()}
         onTransitionCancel={() => this.releaseAnimationLock()}
         // onMouseMove={(ev) => this.drag(ev)}
         ref={this.charBox}

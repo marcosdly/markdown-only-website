@@ -7,12 +7,12 @@ import { Square } from "../lib/square";
 import { State } from "../lib/state";
 import { PositionCSS } from "../lib/style";
 
-const { assign, values } = Object;
+const { assign, values, is } = Object;
 
 interface CharOptions {
   letter: string;
-  icon: string;
-  href: string;
+  iconPath: string | null;
+  href: string | null;
   index: number;
   length: number;
 }
@@ -253,19 +253,21 @@ export class Char extends Component<CharOptions, CharState> {
         ref={this.charBox}
         style={this.state.positionCSS as CSSProperties}
       >
-        <a className="char-link" href={this.props.href}>
+        <a className="char-link" href={this.props.href || ""}>
           <span
             style={{ opacity: this.state.showSecondary ? 0 : 1 }}
             className="char-primary char-content-item"
           >
             {this.props.letter}
           </span>
-          <span
-            style={{ opacity: this.state.showSecondary ? 1 : 0 }}
+          <img
+            style={{
+              opacity:
+                is(this.props.iconPath, null) || !this.state.showSecondary ? 0 : 1,
+            }}
             className="char-secondary char-content-item"
-          >
-            {this.props.icon}
-          </span>
+            src={this.props.iconPath || ""}
+          />
         </a>
       </div>
     );

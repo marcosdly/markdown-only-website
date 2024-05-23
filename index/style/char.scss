@@ -25,6 +25,8 @@ $size: 2rem;
   pointer-events: none;
   user-select: none;
   position: relative;
+  width: inherit;
+  height: inherit;
   // text-transform: uppercase;
 
   &:active,
@@ -42,6 +44,7 @@ $size: 2rem;
   left: 50%;
   transform: translate(-50%, -50%);
   transition: opacity 0.3s ease-out;
+  display: inline;
 }
 
 .char-primary {
@@ -52,6 +55,8 @@ $size: 2rem;
 .char-secondary {
   z-index: 1;
   opacity: 0;
+  width: inherit;
+  height: inherit;
 }
 
 .char-gatter-animation {

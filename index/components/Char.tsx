@@ -106,7 +106,7 @@ export class Char extends Component<CharOptions, CharState> {
     this.auraRadius = this.squareSideSize * 2;
   }
 
-  private onMouseEnter() {
+  private start() {
     if (State.instance.chars.some((char) => char.beingDragged)) return;
     const elemBox = this.charBox.current!.getBoundingClientRect();
     const current: Point2d = new Point2d(
@@ -117,18 +117,18 @@ export class Char extends Component<CharOptions, CharState> {
     this.spread();
   }
 
-  private onMouseLeave() {
+  private interrupt() {
     if (State.instance.chars.some((char) => char.beingDragged)) return;
     this.gatter();
   }
 
-  private onMouseDown() {
+  private startDragging() {
     this.beingDragged = true;
     State.instance.setActive(this.props.index);
     if (State.instance.canvas) State.instance.canvas.rise();
   }
 
-  private onMouseUp() {
+  private stopAndReset() {
     this.beingDragged = false;
     State.instance.inactive();
     if (State.instance.canvas) State.instance.canvas.reset();
@@ -186,10 +186,10 @@ export class Char extends Component<CharOptions, CharState> {
     return (
       <div
         className="char"
-        onMouseEnter={() => this.onMouseEnter()}
-        onMouseLeave={() => this.onMouseLeave()}
-        onMouseDown={() => this.onMouseDown()}
-        onMouseUp={() => this.onMouseUp()}
+        onMouseEnter={() => this.start()}
+        onMouseLeave={() => this.interrupt()}
+        onMouseDown={() => this.startDragging()}
+        onMouseUp={() => this.stopAndReset()}
         // onMouseMove={(ev) => this.drag(ev)}
         ref={this.charBox}
         style={this.state.positionCSS as CSSProperties}

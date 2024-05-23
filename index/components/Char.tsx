@@ -124,6 +124,7 @@ export class Char extends Component<CharOptions, CharState> {
   }
 
   private start() {
+    if (this.props.iconPath === null && this.state.showSecondary) return;
     if (State.instance.chars.some((char) => char.beingDragged)) return;
     const elemBox = this.charBox.current!.getBoundingClientRect();
     const current: Point2d = new Point2d(
@@ -132,11 +133,9 @@ export class Char extends Component<CharOptions, CharState> {
     );
     this.setPosition(current, this.activeZIndex);
     this.spread();
+    if (this.props.iconPath !== null) this.useSecondaryIcon();
     State.instance.chars.forEach((char) => {
-      if (char.props.index === this.props.index) {
-        char.useSecondaryIcon();
-        return;
-      }
+      if (char.props.index === this.props.index) return;
       char.usePrimaryIcon();
     });
   }

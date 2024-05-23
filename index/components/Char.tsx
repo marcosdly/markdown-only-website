@@ -1,4 +1,5 @@
 import { Component, RefObject, createRef } from "preact";
+import { type CSSProperties } from "preact/compat";
 import { default as Victor } from "victor";
 import { Circle } from "../lib/circle";
 import { Point2d } from "../lib/point2d";
@@ -6,20 +7,28 @@ import { Square } from "../lib/square";
 import { State } from "../lib/state";
 import { PositionCSS } from "../lib/style";
 
+const { assign } = Object;
+
 interface CharOptions {
   letter: string;
+  icon: string;
   href: string;
   index: number;
   length: number;
 }
 
-export class Char extends Component<CharOptions, PositionCSS> {
+interface CharState {
+  positionCSS: PositionCSS;
+  content: string;
+}
+
+export class Char extends Component<CharOptions, CharState> {
   private center: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
   public beingDragged: boolean;
   public current: Point2d;
-  public activeZIndex: number = 1000;
-  public inactiveZIndex: number = 1;
+  public activeZIndex: number = 3;
+  public inactiveZIndex: number = 2;
   /** Number in pixels */
   public squareSideSize: number = 32;
   public auraRadius: number = this.squareSideSize * 3;
@@ -29,8 +38,19 @@ export class Char extends Component<CharOptions, PositionCSS> {
     State.instance.add(this.props.index, this);
     this.center = this.getCenterPoint();
     this.current = this.center;
-    this.state = this.center.toStyle().toInlineCSS(this.inactiveZIndex, true);
+    this.state = {
+      positionCSS: this.center.toStyle().toInlineCSS(this.inactiveZIndex, true),
+      content: this.props.letter,
+    };
     this.beingDragged = false;
+  }
+
+  public usePrimaryIcon() {
+    this.setState(assign(this.state, { content: this.props.letter }));
+  }
+
+  public useSecondaryIcon() {
+    this.setState(assign(this.state, { content: this.props.icon }));
   }
 
   private spread() {
@@ -49,10 +69,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
           randomSquare.overlap(new Square(char.current, this.squareSideSize)),
         );
       } while (anyOverlap);
-      char.current = randomSquare.center;
-      char.setState(
-        randomSquare.center.toStyle().toInlineCSS(this.inactiveZIndex, true),
-      );
+      char.setPosition(randomSquare.center, this.inactiveZIndex, true);
     });
   }
 
@@ -62,8 +79,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
 
   public resetPosition() {
     this.beingDragged = false;
-    this.current = this.center;
-    this.setState(this.center.toStyle().toInlineCSS(this.inactiveZIndex, true));
+    this.setPosition(this.center, this.inactiveZIndex, true);
   }
 
   private getCenterPoint(): Point2d {
@@ -71,6 +87,12 @@ export class Char extends Component<CharOptions, PositionCSS> {
       h = document.documentElement.offsetHeight;
 
     return new Point2d((w / (this.props.length + 1)) * (this.props.index + 1), h / 2);
+  }
+
+  public setPosition(p: Point2d, zIndex: number, animations: boolean) {
+    const style = p.toStyle().toInlineCSS(zIndex, animations);
+    this.current = p;
+    this.setState(assign(this.state, { positionCSS: style }));
   }
 
   public updateCenter() {
@@ -84,9 +106,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
       this.squareSideSize / 2 + elemBox.x,
       this.squareSideSize / 2 + elemBox.y,
     );
-    const style = current.toStyle().toInlineCSS(this.activeZIndex, true);
-    this.current = current;
-    this.setState(style);
+    this.setPosition(current, this.activeZIndex, true);
     this.spread();
   }
 
@@ -132,8 +152,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
     }
 
     final.add(relative);
-    this.current = Point2d.fromObject(final);
-    this.setState(this.current.toStyle().toInlineCSS(this.inactiveZIndex, false));
+    this.setPosition(Point2d.fromObject(final), this.inactiveZIndex, false);
   }
 
   public drag(ev: MouseEvent | Point2d) {
@@ -152,8 +171,7 @@ export class Char extends Component<CharOptions, PositionCSS> {
     else if (ev.y <= this.squareSideSize) y = this.squareSideSize;
     else y = ev.y;
 
-    this.current = new Point2d(x, y);
-    this.setState(this.current.toStyle().toInlineCSS(this.activeZIndex, false));
+    this.setPosition(new Point2d(x, y), this.activeZIndex, false);
     State.instance.chars.forEach((char) => char.repel(this.current));
   }
 
@@ -165,12 +183,12 @@ export class Char extends Component<CharOptions, PositionCSS> {
         onMouseLeave={() => this.onMouseLeave()}
         onMouseDown={() => this.onMouseDown()}
         onMouseUp={() => this.onMouseUp()}
-        onMouseMove={(ev) => this.drag(ev)}
+        // onMouseMove={(ev) => this.drag(ev)}
         ref={this.charBox}
-        style={this.state}
+        style={this.state.positionCSS as CSSProperties}
       >
         <a className="char-link" href={this.props.href}>
-          {this.props.letter}
+          {this.state.content}
         </a>
       </div>
     );

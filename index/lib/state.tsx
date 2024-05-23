@@ -35,9 +35,13 @@ export class State {
     this._active = null;
   }
 
+  public isActive() {
+    return !Object.is(this._active, null);
+  }
+
   public getActive(): Char | undefined {
-    if (!this._active) return undefined;
-    return this._chars[this._active];
+    if (!this.isActive()) return undefined;
+    return this._chars[this._active!];
   }
 
   public setCanvas(component: DragCanvas) {

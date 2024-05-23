@@ -12,7 +12,15 @@ export function App() {
 
   const components = "GoldmanYayCool"
     .split("")
-    .map((c, i, arr) => <Char href="" letter={c} index={i} length={arr.length} />);
+    .map((c, i, arr) => (
+      <Char
+        href=""
+        letter={c}
+        icon={arr[arr.length - (i + 1)]}
+        index={i}
+        length={arr.length}
+      />
+    ));
   return (
     <>
       <DragCanvas />

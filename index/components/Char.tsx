@@ -33,6 +33,7 @@ export class Char extends Component<CharOptions, CharState> {
   private center: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
   public beingDragged: boolean;
+  public repositioning: boolean;
   public current: Point2d;
   public activeZIndex: number = 3;
   public inactiveZIndex: number = 2;
@@ -50,6 +51,7 @@ export class Char extends Component<CharOptions, CharState> {
       content: this.props.letter,
     };
     this.beingDragged = false;
+    this.repositioning = false;
   }
 
   public usePrimaryIcon() {
@@ -61,24 +63,28 @@ export class Char extends Component<CharOptions, CharState> {
   }
 
   private spread() {
-    const w = document.documentElement.offsetWidth,
-      h = document.documentElement.offsetHeight;
-
-    State.instance.chars.forEach((char, _, arr) => {
+    State.instance.chars.forEach((char) => {
       char.setAnimation(CharAnimation.SPREAD);
       if (char.props.index === this.props.index) return;
-      let randomSquare: Square, anyOverlap: boolean;
-      do {
-        randomSquare = new Square(
-          Point2d.random(w, h, this.squareSideSize),
-          this.squareSideSize,
-        );
-        anyOverlap = arr.some((char) =>
-          randomSquare.overlap(new Square(char.current, this.squareSideSize)),
-        );
-      } while (anyOverlap);
-      char.setPosition(randomSquare.center, this.inactiveZIndex);
+      const p = char.randomValidPosition();
+      char.setPosition(p, this.inactiveZIndex);
     });
+  }
+
+  public randomValidPosition(): Point2d {
+    const w = document.documentElement.offsetWidth,
+      h = document.documentElement.offsetHeight;
+    let randomSquare: Square, anyOverlap: boolean;
+    do {
+      randomSquare = new Square(
+        Point2d.random(w, h, this.squareSideSize),
+        this.squareSideSize,
+      );
+      anyOverlap = State.instance.chars.some((char) =>
+        randomSquare.overlap(new Square(char.current, this.squareSideSize)),
+      );
+    } while (anyOverlap);
+    return randomSquare.center;
   }
 
   public gatter() {
@@ -137,13 +143,33 @@ export class Char extends Component<CharOptions, CharState> {
     this.beingDragged = true;
     State.instance.setActive(this.props.index);
     if (State.instance.canvas) State.instance.canvas.rise();
-    State.instance.chars.forEach((char) => char.setAnimation(CharAnimation.NONE));
+    this.setAnimation(CharAnimation.NONE);
   }
 
   private stopAndReset() {
     this.beingDragged = false;
     State.instance.inactive();
     if (State.instance.canvas) State.instance.canvas.reset();
+  }
+
+  private onTransitionEnd() {
+    if (!this.charBox.current) return;
+    if (
+      this.charBox.current.classList.contains(CharAnimation.OUTOFBOUNDS) ||
+      this.charBox.current.classList.contains(CharAnimation.SPREAD)
+    ) {
+      this.setAnimation(CharAnimation.NONE);
+    }
+
+    this.releaseAnimationLock();
+  }
+
+  private releaseAnimationLock() {
+    this.repositioning = false;
+  }
+
+  private acquireAnimationLock() {
+    this.repositioning = true;
   }
 
   public setAnimation(type: CharAnimation) {
@@ -153,7 +179,7 @@ export class Char extends Component<CharOptions, CharState> {
   }
 
   public repel(from: Point2d) {
-    if (this.beingDragged) return;
+    if (this.beingDragged || this.repositioning) return;
     const avoid = new Circle(from, this.auraRadius);
     if (!avoid.containsPoint(this.current)) return;
 
@@ -167,13 +193,18 @@ export class Char extends Component<CharOptions, CharState> {
     {
       const w = document.documentElement.offsetWidth,
         h = document.documentElement.offsetHeight,
-        tmpFinal = final.clone().add(relative);
+        tmpFinal = final.clone().add(relative),
+        burstedX =
+          tmpFinal.x <= this.squareSideSize || tmpFinal.x >= w - this.squareSideSize,
+        burstedY =
+          tmpFinal.y <= this.squareSideSize || tmpFinal.y >= h - this.squareSideSize;
 
-      if (tmpFinal.x <= this.squareSideSize || tmpFinal.x >= w - this.squareSideSize)
-        final.invertX();
-
-      if (tmpFinal.y <= this.squareSideSize || tmpFinal.y >= h - this.squareSideSize)
-        final.invertY();
+      if (burstedX || burstedY) {
+        const p = this.randomValidPosition();
+        this.setAnimation(CharAnimation.OUTOFBOUNDS);
+        this.setPosition(p, this.inactiveZIndex);
+        return;
+      }
     }
 
     final.add(relative);
@@ -208,6 +239,9 @@ export class Char extends Component<CharOptions, CharState> {
         onMouseLeave={() => this.interrupt()}
         onMouseDown={() => this.startDragging()}
         onMouseUp={() => this.stopAndReset()}
+        onTransitionRun={() => this.acquireAnimationLock()}
+        onTransitionEnd={() => this.onTransitionEnd()}
+        onTransitionCancel={() => this.releaseAnimationLock()}
         // onMouseMove={(ev) => this.drag(ev)}
         ref={this.charBox}
         style={this.state.positionCSS as CSSProperties}

@@ -19,7 +19,7 @@ interface CharOptions {
 
 interface CharState {
   positionCSS: PositionCSS;
-  content: string;
+  showSecondary: boolean;
 }
 
 export enum CharAnimation {
@@ -48,18 +48,18 @@ export class Char extends Component<CharOptions, CharState> {
     this.current = this.center;
     this.state = {
       positionCSS: this.center.toStyle().toInlineCSS(this.inactiveZIndex),
-      content: this.props.letter,
+      showSecondary: false,
     };
     this.beingDragged = false;
     this.repositioning = false;
   }
 
   public usePrimaryIcon() {
-    this.setState(assign(this.state, { content: this.props.letter }));
+    this.setState(assign(this.state, { showSecondary: false }));
   }
 
   public useSecondaryIcon() {
-    this.setState(assign(this.state, { content: this.props.icon }));
+    this.setState(assign(this.state, { showSecondary: true }));
   }
 
   private spread() {
@@ -132,6 +132,13 @@ export class Char extends Component<CharOptions, CharState> {
     );
     this.setPosition(current, this.activeZIndex);
     this.spread();
+    State.instance.chars.forEach((char) => {
+      if (char.props.index === this.props.index) {
+        char.useSecondaryIcon();
+        return;
+      }
+      char.usePrimaryIcon();
+    });
   }
 
   private interrupt() {
@@ -247,7 +254,18 @@ export class Char extends Component<CharOptions, CharState> {
         style={this.state.positionCSS as CSSProperties}
       >
         <a className="char-link" href={this.props.href}>
-          {this.state.content}
+          <span
+            style={{ opacity: this.state.showSecondary ? 0 : 1 }}
+            className="char-primary char-content-item"
+          >
+            {this.props.letter}
+          </span>
+          <span
+            style={{ opacity: this.state.showSecondary ? 1 : 0 }}
+            className="char-secondary char-content-item"
+          >
+            {this.props.icon}
+          </span>
         </a>
       </div>
     );

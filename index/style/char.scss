@@ -16,10 +16,6 @@ $size: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition:
-    top 1s ease-in-out,
-    left 1s ease-in-out,
-    transform 1s ease-in-out;
 }
 
 .char-link {
@@ -37,4 +33,29 @@ $size: 2rem;
     text-decoration: none;
     color: color.$foreground;
   }
+}
+
+.char-gatter-animation {
+  transition:
+    top 1s ease-in-out,
+    left 1s ease-in-out,
+    transform 1s ease-in-out;
+}
+
+.char-spread-animation {
+  transition:
+    top 0.5s ease-in-out,
+    left 0.5s ease-in-out,
+    transform 0.5s ease-in-out;
+}
+
+.char-outofbounds-animation {
+  transition:
+    top 0.3s ease,
+    left 0.3s ease,
+    transform 0.3s ease;
+}
+
+.char-no-animation {
+  transition: unset;
 }

@@ -4,7 +4,6 @@ export interface PositionCSS {
   left: string;
   top: string;
   transform: string;
-  transition: "unset" | undefined;
   zIndex: string;
 }
 
@@ -24,13 +23,12 @@ export class Style {
     this.y = 100 - this.top;
   }
 
-  public toInlineCSS(zIndex: number, animations: boolean): PositionCSS {
+  public toInlineCSS(zIndex: number): PositionCSS {
     return {
       top: `${this.top}%`,
       left: `${this.left}%`,
       transform: `translate(-${this.x}%, -${this.y}%)`,
       zIndex: zIndex.toString(),
-      transition: animations ? undefined : "unset",
     };
   }
 }

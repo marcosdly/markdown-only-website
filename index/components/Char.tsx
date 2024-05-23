@@ -7,7 +7,7 @@ import { Square } from "../lib/square";
 import { State } from "../lib/state";
 import { PositionCSS } from "../lib/style";
 
-const { assign } = Object;
+const { assign, values } = Object;
 
 interface CharOptions {
   letter: string;
@@ -20,6 +20,13 @@ interface CharOptions {
 interface CharState {
   positionCSS: PositionCSS;
   content: string;
+}
+
+export enum CharAnimation {
+  GATTER = "char-gatter-animation",
+  SPREAD = "char-spread-animation",
+  OUTOFBOUNDS = "char-outofbounds-animation",
+  NONE = "char-no-animation",
 }
 
 export class Char extends Component<CharOptions, CharState> {
@@ -39,7 +46,7 @@ export class Char extends Component<CharOptions, CharState> {
     this.center = this.getCenterPoint();
     this.current = this.center;
     this.state = {
-      positionCSS: this.center.toStyle().toInlineCSS(this.inactiveZIndex, true),
+      positionCSS: this.center.toStyle().toInlineCSS(this.inactiveZIndex),
       content: this.props.letter,
     };
     this.beingDragged = false;
@@ -58,6 +65,7 @@ export class Char extends Component<CharOptions, CharState> {
       h = document.documentElement.offsetHeight;
 
     State.instance.chars.forEach((char, _, arr) => {
+      char.setAnimation(CharAnimation.SPREAD);
       if (char.props.index === this.props.index) return;
       let randomSquare: Square, anyOverlap: boolean;
       do {
@@ -69,17 +77,20 @@ export class Char extends Component<CharOptions, CharState> {
           randomSquare.overlap(new Square(char.current, this.squareSideSize)),
         );
       } while (anyOverlap);
-      char.setPosition(randomSquare.center, this.inactiveZIndex, true);
+      char.setPosition(randomSquare.center, this.inactiveZIndex);
     });
   }
 
   public gatter() {
-    State.instance.chars.forEach((char) => char.resetPosition());
+    State.instance.chars.forEach((char) => {
+      char.resetPosition();
+      char.setAnimation(CharAnimation.GATTER);
+    });
   }
 
   public resetPosition() {
     this.beingDragged = false;
-    this.setPosition(this.center, this.inactiveZIndex, true);
+    this.setPosition(this.center, this.inactiveZIndex);
   }
 
   private getCenterPoint(): Point2d {
@@ -89,8 +100,8 @@ export class Char extends Component<CharOptions, CharState> {
     return new Point2d((w / (this.props.length + 1)) * (this.props.index + 1), h / 2);
   }
 
-  public setPosition(p: Point2d, zIndex: number, animations: boolean) {
-    const style = p.toStyle().toInlineCSS(zIndex, animations);
+  public setPosition(p: Point2d, zIndex: number) {
+    const style = p.toStyle().toInlineCSS(zIndex);
     this.current = p;
     this.setState(assign(this.state, { positionCSS: style }));
   }
@@ -113,7 +124,7 @@ export class Char extends Component<CharOptions, CharState> {
       this.squareSideSize / 2 + elemBox.x,
       this.squareSideSize / 2 + elemBox.y,
     );
-    this.setPosition(current, this.activeZIndex, true);
+    this.setPosition(current, this.activeZIndex);
     this.spread();
   }
 
@@ -126,12 +137,19 @@ export class Char extends Component<CharOptions, CharState> {
     this.beingDragged = true;
     State.instance.setActive(this.props.index);
     if (State.instance.canvas) State.instance.canvas.rise();
+    State.instance.chars.forEach((char) => char.setAnimation(CharAnimation.NONE));
   }
 
   private stopAndReset() {
     this.beingDragged = false;
     State.instance.inactive();
     if (State.instance.canvas) State.instance.canvas.reset();
+  }
+
+  public setAnimation(type: CharAnimation) {
+    if (!this.charBox.current) return;
+    this.charBox.current.classList.remove(...values(CharAnimation));
+    this.charBox.current.classList.add(type);
   }
 
   public repel(from: Point2d) {
@@ -159,7 +177,7 @@ export class Char extends Component<CharOptions, CharState> {
     }
 
     final.add(relative);
-    this.setPosition(Point2d.fromObject(final), this.inactiveZIndex, false);
+    this.setPosition(Point2d.fromObject(final), this.inactiveZIndex);
   }
 
   public drag(ev: MouseEvent | Point2d) {
@@ -178,7 +196,7 @@ export class Char extends Component<CharOptions, CharState> {
     else if (ev.y <= this.squareSideSize) y = this.squareSideSize;
     else y = ev.y;
 
-    this.setPosition(new Point2d(x, y), this.activeZIndex, false);
+    this.setPosition(new Point2d(x, y), this.activeZIndex);
     State.instance.chars.forEach((char) => char.repel(this.current));
   }
 

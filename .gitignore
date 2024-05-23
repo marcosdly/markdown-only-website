@@ -132,3 +132,4 @@ dist
 # lockfiles
 yarn.lock
 pnpm-lock.yaml
+assets/icons/

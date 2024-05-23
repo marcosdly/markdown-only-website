@@ -6,7 +6,10 @@ import { State } from "./lib/state";
 export function App() {
   useEffect(() => {
     addEventListener("resize", () => {
-      State.instance.chars.forEach((char) => char.updateCenter());
+      State.instance.chars.forEach((char) => {
+        char.updateCenter();
+        char.updateSize();
+      });
     });
   }, []);
 

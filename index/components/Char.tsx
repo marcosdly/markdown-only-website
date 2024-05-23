@@ -30,8 +30,8 @@ export class Char extends Component<CharOptions, CharState> {
   public activeZIndex: number = 3;
   public inactiveZIndex: number = 2;
   /** Number in pixels */
-  public squareSideSize: number = 32;
-  public auraRadius: number = this.squareSideSize * 3;
+  public squareSideSize: number = 32; // placeholder
+  public auraRadius: number = this.squareSideSize * 2; // placeholder
 
   constructor(props: CharOptions) {
     super(props);
@@ -97,6 +97,13 @@ export class Char extends Component<CharOptions, CharState> {
 
   public updateCenter() {
     this.center = this.getCenterPoint();
+  }
+
+  public updateSize() {
+    if (!this.charBox.current) return;
+    const box = this.charBox.current.getBoundingClientRect();
+    this.squareSideSize = box.width;
+    this.auraRadius = this.squareSideSize * 2;
   }
 
   private onMouseEnter() {
@@ -192,5 +199,9 @@ export class Char extends Component<CharOptions, CharState> {
         </a>
       </div>
     );
+  }
+
+  componentDidMount() {
+    this.updateSize();
   }
 }

@@ -146,6 +146,7 @@ export class Char extends Component<CharOptions, CharState> {
   }
 
   private startDragging() {
+    if (this.props.iconPath === null && this.state.showSecondary) return;
     this.beingDragged = true;
     State.instance.setActive(this.props.index);
     if (State.instance.canvas) State.instance.canvas.rise();

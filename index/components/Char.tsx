@@ -29,6 +29,37 @@ export enum CharAnimation {
   NONE = "char-no-animation",
 }
 
+export namespace CharOperations {
+  export function randomValidPosition(squareSideSize: number): Point2d {
+    const w = document.documentElement.offsetWidth,
+      h = document.documentElement.offsetHeight;
+    let randomSquare: Square, anyOverlap: boolean;
+    do {
+      randomSquare = new Square(Point2d.random(w, h, squareSideSize), squareSideSize);
+      anyOverlap = State.instance.chars.some((char) =>
+        randomSquare.overlap(new Square(char.current, squareSideSize)),
+      );
+    } while (anyOverlap);
+    return randomSquare.center;
+  }
+
+  export function spread(ignore: number) {
+    State.instance.chars.forEach((char) => {
+      char.setAnimation(CharAnimation.SPREAD);
+      if (char.props.index === ignore) return;
+      const p = randomValidPosition(char.squareSideSize);
+      char.setPosition(p, char.inactiveZIndex);
+    });
+  }
+
+  export function gatter() {
+    State.instance.chars.forEach((char) => {
+      char.resetPosition();
+      char.setAnimation(CharAnimation.GATTER);
+    });
+  }
+}
+
 export class Char extends Component<CharOptions, CharState> {
   private center: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
@@ -60,38 +91,6 @@ export class Char extends Component<CharOptions, CharState> {
 
   public useSecondaryIcon() {
     this.setState(assign(this.state, { showSecondary: true }));
-  }
-
-  private spread() {
-    State.instance.chars.forEach((char) => {
-      char.setAnimation(CharAnimation.SPREAD);
-      if (char.props.index === this.props.index) return;
-      const p = char.randomValidPosition();
-      char.setPosition(p, this.inactiveZIndex);
-    });
-  }
-
-  public randomValidPosition(): Point2d {
-    const w = document.documentElement.offsetWidth,
-      h = document.documentElement.offsetHeight;
-    let randomSquare: Square, anyOverlap: boolean;
-    do {
-      randomSquare = new Square(
-        Point2d.random(w, h, this.squareSideSize),
-        this.squareSideSize,
-      );
-      anyOverlap = State.instance.chars.some((char) =>
-        randomSquare.overlap(new Square(char.current, this.squareSideSize)),
-      );
-    } while (anyOverlap);
-    return randomSquare.center;
-  }
-
-  public gatter() {
-    State.instance.chars.forEach((char) => {
-      char.resetPosition();
-      char.setAnimation(CharAnimation.GATTER);
-    });
   }
 
   public resetPosition() {
@@ -132,7 +131,7 @@ export class Char extends Component<CharOptions, CharState> {
       this.squareSideSize / 2 + elemBox.y,
     );
     this.setPosition(current, this.activeZIndex);
-    this.spread();
+    CharOperations.spread(this.props.index);
     if (this.props.iconPath !== null) this.useSecondaryIcon();
     State.instance.chars.forEach((char) => {
       if (char.props.index === this.props.index) return;
@@ -142,7 +141,7 @@ export class Char extends Component<CharOptions, CharState> {
 
   private interrupt() {
     if (State.instance.chars.some((char) => char.beingDragged)) return;
-    this.gatter();
+    CharOperations.gatter();
   }
 
   private startDragging() {
@@ -195,7 +194,7 @@ export class Char extends Component<CharOptions, CharState> {
           tmpFinal.y <= this.squareSideSize || tmpFinal.y >= h - this.squareSideSize;
 
       if (burstedX || burstedY) {
-        const p = this.randomValidPosition();
+        const p = CharOperations.randomValidPosition(this.squareSideSize);
         this.setAnimation(CharAnimation.OUTOFBOUNDS);
         this.setPosition(p, this.inactiveZIndex);
         return;

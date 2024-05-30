@@ -1,5 +1,6 @@
 import { Component } from "preact";
 import { State } from "../lib/state";
+import { CharOperations } from "./Char";
 
 interface Style {
   zIndex: string;
@@ -22,7 +23,7 @@ export class DragCanvas extends Component<unknown, Style> {
   public sink() {
     this.setState(this.inactiveStyle);
     if (State.instance.isActive()) {
-      State.instance.getActive()!.gatter();
+      CharOperations.gatter();
       State.instance.getActive()!.usePrimaryIcon();
       State.instance.inactive();
     }

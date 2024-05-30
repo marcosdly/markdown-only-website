@@ -1,6 +1,9 @@
 import { Char } from "../components/Char";
 import { DragCanvas } from "../components/DragCanvas";
 
+export class StateNotInitializedError extends TypeError {}
+export class StateUnsetError extends TypeError {}
+
 export class State {
   public static instance = new this();
 
@@ -14,12 +17,14 @@ export class State {
     return this._chars;
   }
 
-  public get canvas() {
-    return this._canvas;
+  public get canvas(): DragCanvas {
+    if (!this._canvas) throw new StateNotInitializedError("DragCanvas is not set.");
+    return this._canvas!;
   }
 
-  public get active() {
-    return this._active;
+  public get active(): number {
+    if (!this._active) throw new StateUnsetError("There isn't a Char object active.");
+    return this._active!;
   }
 
   public add(index: number, component: Char) {

@@ -149,14 +149,14 @@ export class Char extends Component<CharOptions, CharState> {
     if (this.props.iconPath === null && this.state.showSecondary) return;
     this.beingDragged = true;
     State.instance.setActive(this.props.index);
-    if (State.instance.canvas) State.instance.canvas.rise();
+    State.instance.canvas.rise();
     this.setAnimation(CharAnimation.NONE);
   }
 
   private stopAndReset() {
     this.beingDragged = false;
     State.instance.inactive();
-    if (State.instance.canvas) State.instance.canvas.reset();
+    State.instance.canvas.reset();
   }
 
   private releaseAnimationLock() {

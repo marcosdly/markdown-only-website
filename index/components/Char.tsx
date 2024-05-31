@@ -1,3 +1,4 @@
+import hyperlink from "bootstrap-icons/icons/box-arrow-up-right.svg";
 import { Component, RefObject, createRef } from "preact";
 import { type CSSProperties } from "preact/compat";
 import { default as Victor } from "victor";
@@ -17,8 +18,14 @@ interface CharOptions {
   length: number;
 }
 
+export interface RedirectingCSS {
+  left: string | undefined;
+  top: string;
+}
+
 interface CharState {
   positionCSS: PositionCSS;
+  redirectingPositionCSS: RedirectingCSS;
   showSecondary: boolean;
 }
 
@@ -63,9 +70,11 @@ export namespace CharOperations {
 export class Char extends Component<CharOptions, CharState> {
   private center: Point2d;
   private charBox: RefObject<HTMLDivElement> = createRef();
+  private redirectingBox: RefObject<HTMLDivElement> = createRef();
   public beingDragged: boolean;
   public repositioning: boolean;
   public current: Point2d;
+  public redirectingZIndex: number = 4;
   public activeZIndex: number = 3;
   public inactiveZIndex: number = 2;
   /** Number in pixels */
@@ -79,6 +88,7 @@ export class Char extends Component<CharOptions, CharState> {
     this.current = this.center;
     this.state = {
       positionCSS: this.center.toStyle().toInlineCSS(this.inactiveZIndex),
+      redirectingPositionCSS: { left: "0px", top: "0px" },
       showSecondary: false,
     };
     this.beingDragged = false;
@@ -105,6 +115,45 @@ export class Char extends Component<CharOptions, CharState> {
     return new Point2d((w / (this.props.length + 1)) * (this.props.index + 1), h / 2);
   }
 
+  private getRedirectingPosition() {
+    const w = document.documentElement.offsetWidth,
+      y = this.squareSideSize * 1.5,
+      halfBox = this.redirectingBox.current!.getBoundingClientRect().width / 2,
+      borderOffset = this.squareSideSize;
+
+    let x: number;
+
+    if (this.center.x - halfBox < borderOffset) x = -halfBox + borderOffset;
+    else if (this.center.x + halfBox > w - borderOffset) x = -halfBox - borderOffset;
+    else x = 0;
+
+    return new Point2d(x, -y);
+  }
+
+  public updateRedirectingPosition() {
+    const p = this.getRedirectingPosition();
+    this.setState(
+      assign(this.state, {
+        redirectingPositionCSS: {
+          left: p.x !== 0 ? `${p.x}px` : undefined,
+          top: `${p.y}px`,
+        },
+      }),
+    );
+  }
+
+  public showRedirecting() {
+    if (!this.props.href) return;
+    this.redirectingBox.current!.classList.add("char-redirecting-show");
+    this.redirectingBox.current!.classList.remove("char-redirecting-hide");
+  }
+
+  public hideRedirecting() {
+    if (!this.props.href) return;
+    this.redirectingBox.current!.classList.add("char-redirecting-hide");
+    this.redirectingBox.current!.classList.remove("char-redirecting-show");
+  }
+
   public setPosition(p: Point2d, zIndex: number) {
     const style = p.toStyle().toInlineCSS(zIndex);
     this.current = p;
@@ -122,6 +171,11 @@ export class Char extends Component<CharOptions, CharState> {
     this.auraRadius = this.squareSideSize * 2;
   }
 
+  public redirectToHyperlink(ev: TransitionEvent) {
+    if (!this.props.href || ev.propertyName !== "color") return;
+    document.location = this.props.href;
+  }
+
   private start() {
     if (this.props.iconPath === null && this.state.showSecondary) return;
     if (State.instance.chars.some((char) => char.beingDragged)) return;
@@ -137,11 +191,13 @@ export class Char extends Component<CharOptions, CharState> {
       if (char.props.index === this.props.index) return;
       char.usePrimaryIcon();
     });
+    this.showRedirecting();
   }
 
   private interrupt() {
     if (State.instance.chars.some((char) => char.beingDragged)) return;
     CharOperations.gatter();
+    this.hideRedirecting();
   }
 
   private startDragging() {
@@ -227,6 +283,17 @@ export class Char extends Component<CharOptions, CharState> {
   }
 
   render() {
+    const redirectPopup = (
+      <div
+        style={this.state.redirectingPositionCSS as CSSProperties}
+        ref={this.redirectingBox}
+        className="char-redirecting char-redirecting-hide"
+      >
+        <p onTransitionEnd={(ev) => this.redirectToHyperlink(ev)}>Redirecting</p>
+        <img src={hyperlink} alt="link icon" />
+      </div>
+    );
+
     return (
       <div
         className="char"
@@ -241,6 +308,7 @@ export class Char extends Component<CharOptions, CharState> {
         ref={this.charBox}
         style={this.state.positionCSS as CSSProperties}
       >
+        {redirectPopup}
         <a className="char-link" href={this.props.href || ""}>
           <span
             style={{ opacity: this.state.showSecondary ? 0 : 1 }}
@@ -263,5 +331,6 @@ export class Char extends Component<CharOptions, CharState> {
 
   componentDidMount() {
     this.updateSize();
+    this.updateRedirectingPosition();
   }
 }

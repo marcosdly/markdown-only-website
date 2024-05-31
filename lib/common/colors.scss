@@ -1,2 +1,13 @@
 $background: #d6d6d6;
 $foreground: #333;
+$grey: #aaa;
+
+@mixin filter-foreground {
+  filter: invert(17%) sepia(18%) saturate(0%) hue-rotate(169deg) brightness(96%)
+    contrast(92%);
+}
+
+@mixin filter-grey {
+  filter: invert(83%) sepia(0%) saturate(33%) hue-rotate(191deg) brightness(86%)
+    contrast(79%);
+}
